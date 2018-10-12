@@ -1,0 +1,103 @@
+{% extends "blank.html" %}
+
+{% block title %}
+    Vue示例
+{% endblock %}
+
+{% block style %}
+    <script src="/static/vendor/jquery/jquery.min.js"></script>
+    <script src="/static/js/vue.js"></script>
+{% endblock %}
+
+
+{% block label %}
+    Vue示例
+{% endblock %}
+
+{% block content %}
+    {% verbatim nameblock %}
+        <div id="example">
+            <p>
+                <span>基本的文本绑定:</span>
+                <span>I am {{ name }}</span>
+            </p>
+            <p>
+            <ul>
+                <span>基本的循环绑定:</span>
+                <li v-for="a in page">{{ a }}</li>
+            </ul>
+            </p>
+            <p>
+                <!--
+                强调三样
+                    1、绑定属性
+                    2、绑定多重属性
+                    3、绑定字典对象
+                -->
+                <span>带有属性和映射的循环绑定:</span>
+            <ul>
+                <li v-for="data in message">
+                    <a v-bind:href="data.name" v-bind:class='[data.name,data.cla]'>
+                        {{ data.name }}
+                    </a>
+                </li>
+            </ul>
+            </p>
+
+            <p>
+                <span>基本的事件绑定:</span>
+                <button v-on:click="sample_method">按我呀！</button>
+            </p>
+            <p>
+                <span>基于ajax的传参绑定:</span>
+            <ul>
+                <ul>
+                    <li v-for="p in page">
+                        <a v-on:click="ajax_method(p)">
+                            {{ p }}
+                        </a>
+                    </li>
+                </ul>
+            </ul>
+            </p>
+
+        </div>
+    {% endverbatim nameblock %}
+    <script>
+        new Vue({
+            el: "#example",
+            data: {
+                name: "Dong",
+                page: [1, 2, 3, 4, 5],
+                message: [
+                    {name: "Bryant", id: 1, cla: "test1"},
+                    {name: "T-mac", id: 2, cla: "test2"},
+                    {name: "Green", id: 3, cla: "test3"},
+                    {name: "Magee", id: 4, cla: "test4"},
+                    {name: "Cociey", id: 5, cla: "test5"}
+                ],
+                ajaxData: ""
+            },
+            methods: {
+                sample_method: function () {
+                    alert("hello world!")
+                },
+                ajax_method: function (page) {
+                    $.ajax(
+                        {
+                            url: "/server/ajax_server/" + page,
+                            data: "",
+                            type: "get",
+                            success: function (data) {
+                                console.log(data["page_data"]);
+                            },
+                            error: function (error) {
+                                console.log(error)
+                            }
+                        }
+                    )
+                }
+            }
+        })
+    </script>
+{% endblock %}

@@ -1,0 +1,182 @@
+{% extends "blank.html" %}
+
+{% block title %}
+    服务器管理-首页
+{% endblock %}
+
+{% block style %}
+    <link rel="stylesheet" href="/static/css/register.css">
+{% endblock %}
+
+{% block label %}
+    <!--模态框触发部分-->
+    <!--
+        data-toggle 以何种形式展示模态框 modal popover
+        data-target 模态框id
+    -->
+    <div class="container-fluid">
+        <div class="col-md-10">
+            CMDB管理-首页
+        </div>
+        <div class="col-md-1">
+            <button class="btn btn-default">
+                <a href="{% url 'login' %}">退出</a>
+            </button>
+        </div>
+        <div class="col-md-1">
+            <button class="btn btn-default" data-toggle="modal" data-target="#register_user_modal">
+                <a>注册</a>
+            </button>
+        </div>
+    </div>
+    <!--模态框触发部分结束-->
+{% endblock %}
+
+{% block content %}
+    <!--模态框面板部分-->
+    <!--
+       tabindex  tab键导航切换的顺序
+       role = dialog 指定展示的样式（角色）为模态框
+       aria-labelledby = 设置aria-labelledby的值为某个元素的id，那么浏览器就可以读取它的值。
+            当 ul 获取到焦点时，屏幕阅读器会读：“选择你的职业”
+       footer 页脚
+    -->
+    <div class="modal fade" id="register_user_modal" tabindex="-1" role="dialog" aria-labelledby="MyLabel"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <!-- 下面的是关闭按钮 -->
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        x {# data-dismiss="modal" 用来关闭模态框 #}
+                    </button>
+                    <h4 class="modal-title" id="MyLabel">
+                        用户注册
+                    </h4>
+                </div>
+                <form method="post" id="register_Form" enctype="multipart/form-data">
+                    <div class="modal-body">
+                        {% csrf_token %}
+                        {% for form in forms %}
+                            <div class="form-group input-group">
+                                <span class="input-group-addon">{{ form.label }}</span>
+                                {{ form }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary">
+                            提交
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!--模态框面板部分结束-->
+
+
+{% endblock %}
+
+
+{% block script %}
+    <script type="text/javascript" src="/static/vendor/jquery/jquery.validate.min.js"></script>
+    <script type="text/javascript" src="/static/vendor/jquery/messages_zh.min.js"></script>
+
+    <script>
+        $().ready({# 当DOM加载完成后，执行这个函数 #}
+            function () {
+                $("#register_Form").validate(
+                    {
+                        rules: {
+                            id_username: {
+                                required: true,
+                                maxlength: 32,
+                                minlength: 2
+                            },
+                            id_password: {
+                                required: true,
+                                maxlength: 32,
+                                minlength: 2
+                            },
+                            id_nickname: {
+                                required: true,
+                                maxlength: 32,
+                                minlength: 2
+                            },
+                            id_phone: {
+                                required: true
+                            },
+                            id_email: {
+                                email: true
+                            }
+                        },
+                        messages: {
+                            id_username: {
+                                required: "用户名不能为空",
+                                maxlength: "用户名不能大于6位",
+                                minlength: "用户名不能小于2位"
+                            },
+                            id_password: {
+                                required: "密码不能大于6为",
+                                maxlength: "密码不能大于6位",
+                                minlength: "密码不能小于2位"
+                            },
+                            id_nickname: {
+                                required: "用户姓名不能大于6为",
+                                maxlength: "用户姓名不能大于6位",
+                                minlength: "用户姓名不能小于2位"
+                            },
+                            id_phone: {
+                                required: "电话不能为空"
+                            },
+                            id_email: {
+                                email: "邮件需要符合格式"
+                            }
+                        },
+                        submitHandler: function (form) {
+                            {#form.submit();#}   //单纯的提交给后端，并不是异步提交ajax
+                            var formData = new FormData();
+                            data = $("#register_Form").serializeArray();
+                            for (var d in data) {
+                                key = data[d]["name"];   //d是索引，整个data是一个字典
+                                value = data[d]["value"];
+                                formData.append(key, value)
+                            }
+                            //填充图片
+                            img = $("#id_photo")[0].files[0];   //可以通过F12查看器查看id
+                            //console.log(img);
+                            formData.append("photo", img);
+                            //取csrf的值
+                            var csrftoken = data[0]["value"];
+                            $.ajax(
+                                {
+                                    url: "/user/register/",
+                                    type: "post",
+                                    data: formData,
+                                    traditional: true, //是否深度序列化数据,true为不深度(比如有嵌套层)
+                                    processData: false,  //是否序列化字符串（有文件，所以不序列化）
+                                    contentType: false,  //信息的类型
+                                    success: function (data) {
+                                        console.log(data)
+                                    },
+                                    {#beforeSend: function () {#}
+                                    {#    // 禁用按钮防止重复提交,防止提交数据库多次脏数据#}
+                                    {#    $("#submit").attr({disabled: "disabled"});#}
+                                    //},
+                                    beforeSend: function (xhr, settings) {
+                                        //XMLHttpRequest.setRequestHeader() == xhr.setRequestHeader()
+                                        xhr.setRequestHeader("X-CSRFToken", csrftoken)
+                                    },//发送数据之前
+                                    error: function (error) {
+                                        console.log(error)
+                                    }
+                                }
+                            )
+                        }
+                    }
+                )
+            }
+        )
+    </script>
+{% endblock %}

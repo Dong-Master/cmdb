@@ -1,0 +1,110 @@
+{% extends "blank.html" %}
+
+{% block title %}
+    服务器列表
+{% endblock %}
+{% block style %}
+    <script src="/static/vendor/jquery/jquery.min.js"></script>
+    <script src="/static/js/vue.js"></script>
+    <script src="/static/js/vue-resource.js"></script>
+{% endblock %}
+
+{% block label %}
+    服务器列表_ajax
+{% endblock %}
+
+{% block content %}
+    <!--表格开始-->
+    <!-- /.row -->
+    {% verbatim myblock %}
+        <div class="row" id="serverData">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <!-- /.panel-heading -->
+                    <div class="panel-body">
+                        <table width="100%" class="table table-striped table-bordered table-hover"
+                               id="dataTables-example">
+                            <thead>
+                            <tr>
+                                <th>hostname</th>
+                                <th>ip</th>
+                                <th>mac</th>
+                                <th>cpu</th>
+                                <th>memory</th>
+                                <th>isalive</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr class="odd gradeX" v-for="data in page_data">
+                                <td>
+                                    <a href="{{ data.id }}">
+                                        {{ data.hostname }}
+                                    </a>
+                                </td>
+                                <td>{{ data.ip }}</td>
+                                <td>{{ data.mac }}</td>
+                                <td>{{ data.cpu }}</td>
+                                <td>{{ data.memory }}</td>
+                                <td>{{ data.isalive }}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <!-- /.table-responsive -->
+                        <ul class="pagination pull-right">
+                            <li v-for="page in page_range">
+                                <a v-on:click="getPage(page)">{{ page }}</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /.panel-body -->
+                </div>
+                <!-- /.panel -->
+            </div>
+            <!-- /.col-lg-12 -->
+        </div>
+    {% endverbatim myblock %}
+    <!--表格结束-->
+    <script>
+        Vue.use(VueResource);// 强调使用vue_resource.js
+        new Vue(
+            {
+                el: "#serverData",
+                data: {
+                    page_data: "", //页面数据
+                    page_range: "" //页码数据
+                },
+                created: function () {
+                    var url = "/server/ajax_server/";
+                    this.$http.get(url).then(
+                        function (data) {
+                            console.log(data);
+                            var Data = data.data;
+                            this.page_data = Data.page_data;
+                            this.page_range = Data.page_range
+
+                        },
+                        function (error) {
+                            console.log(error)
+                        }
+                    ); //vue_resource.js自带的ajax请求方法
+                },//初始
+                methods: {
+                    getPage: function (page) {
+                        var url = "/server/ajax_server/" + page;
+                        this.$http.get(url).then(
+                            function (data) {
+                                console.log(data.data);
+                                var Data = data.data;
+                                this.page_data = Data.page_data;
+                                this.page_range = Data.page_range
+                            },
+                            function (error) {
+                                console.log(error)
+                            }
+                        );
+                    }
+                }
+            }
+        )
+    </script>
+{% endblock %}

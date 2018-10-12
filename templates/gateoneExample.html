@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>gateoneExample</title>
+    <script src="/static/js/gateone.js"></script>
+    <script src="/static/vendor/jquery/jquery.min.js"></script>
+</head>
+<body>
+    <div id="gateone_container" style="position: relative;width: 80em;height: 60em">
+        <div id="gateone">
+
+        </div>
+</div>
+</body>
+    <script>
+        $(
+            function () {
+                GateOne.init(
+                    {url: "https://10.10.10.69:443"}
+                )
+            }
+        )
+    </script>
+</html>
